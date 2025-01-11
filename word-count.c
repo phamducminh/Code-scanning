@@ -5,7 +5,18 @@
  
 #define BUFSIZE 256
 
-
+unsigned long fsize(char* file)
+{
+    FILE * f = fopen(file, "rb");
+    if (!f) {
+        fprintf(stderr, "Error: Unable to open the file '%s'.\n", file);
+        return -1;
+    }
+    fseek(f, 0, SEEK_END);
+    unsigned long len = (unsigned long)ftell(f);
+    fclose(f);
+    return len;
+}
     
 // This program prints the size of a specified file in bytes
 int main(int argc, char** argv) {
@@ -15,31 +26,12 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Open the file in read mode
-    FILE *file = fopen(argv[1], "rb");
-    if (!file) {
-        fprintf(stderr, "Error: Unable to open the file '%s'.\n", argv[1]);
-        return -1;
-    }
-
-    // Seek to the end of the file to determine its size
-    if (fseek(file, 0, SEEK_END) != 0) {
-        fprintf(stderr, "Error: Unable to determine the file size.\n");
-        fclose(file);
-        return -1;
-    }
-
-    // Get the file size in bytes
-    long filesize = ftell(file);
+    long filesize = fsize(argv[1]);
     if (filesize == -1L) {
-        fprintf(stderr, "Error: Unable to retrieve the file size.\n");
-        fclose(file);
         return -1;
+    } else {
+        printf("File size: %ld bytes\n", filesize);
     }
-
-    printf("File size: %ld bytes\n", filesize);
-
-    // Close the file and exit
-    fclose(file);
+    
     return 0;
 }
