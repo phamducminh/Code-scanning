@@ -1,8 +1,11 @@
+#include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
  
 #define BUFSIZE 256
+
+
     
 // This program prints the size of a specified file in bytes
 int main(int argc, char** argv) {
@@ -12,25 +15,31 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // Validate the file name length
-    if (snprintf(NULL, 0, "wc -c < '%s'", argv[1]) >= BUFSIZE) {
-        fprintf(stderr, "Error: File name is too long.\n");
+    // Open the file in read mode
+    FILE *file = fopen(argv[1], "rb");
+    if (!file) {
+        fprintf(stderr, "Error: Unable to open the file '%s'.\n", argv[1]);
         return -1;
     }
 
-    // Construct the command safely using snprintf
-    char cmd[BUFSIZE];
-    if (snprintf(cmd, sizeof(cmd), "wc -c < '%s'", argv[1]) >= sizeof(cmd)) {
-        fprintf(stderr, "Error: Command buffer overflow.\n");
+    // Seek to the end of the file to determine its size
+    if (fseek(file, 0, SEEK_END) != 0) {
+        fprintf(stderr, "Error: Unable to determine the file size.\n");
+        fclose(file);
         return -1;
     }
 
-    // Execute the system command
-    int ret = system(cmd);
-    if (ret == -1) {
-        fprintf(stderr, "Error: Failed to execute system command.\n");
+    // Get the file size in bytes
+    long filesize = ftell(file);
+    if (filesize == -1L) {
+        fprintf(stderr, "Error: Unable to retrieve the file size.\n");
+        fclose(file);
         return -1;
     }
 
+    printf("File size: %ld bytes\n", filesize);
+
+    // Close the file and exit
+    fclose(file);
     return 0;
 }
