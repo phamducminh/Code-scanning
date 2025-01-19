@@ -1,2 +1,2 @@
 all:
-	gcc -o main atoi.c
+	gcc -o main word-count.c
